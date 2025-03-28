@@ -32,15 +32,16 @@ echo "OPENAI_API_KEY=your_api_key_here" > .env
 ## Patterns Overview
 
 This repository includes implementations of the following patterns:
+ 
+1. [**Augmented LLM**](#1-augmented-llm-pattern): The basic building block enhanced with memory and tools
+2. [**Stateful LLM**](#2-stateful-llm-pattern): Adding persistence and reliability to LLM agents
+3. [**Prompt Chaining**](#3-prompt-chaining-pattern): Breaking complex tasks into sequential steps
+4. [**Parallelization**](#4-parallelization-pattern): Processing multiple aspects of a task simultaneously
+5. [**Routing**](#5-routing-pattern): Directing inputs to specialized handlers
+6. [**Orchestrator-Workers**](#6-orchestrator-workers-pattern): Dynamically planning and delegating subtasks
+7. [**Evaluator-Optimizer**](#7-evaluator-optimizer-pattern): Iterative improvement through feedback loops
+8. [**Autonomous Agent**](#8-autonomous-agent-pattern): Self-directed reasoning and tool usage
 
-1. **Augmented LLM**: The basic building block enhanced with memory and tools
-2. **Stateful LLM**: Adding persistence and reliability to LLM agents
-3. **Prompt Chaining**: Breaking complex tasks into sequential steps
-4. **Parallelization**: Processing multiple aspects of a task simultaneously
-5. **Routing**: Directing inputs to specialized handlers
-6. **Orchestrator-Workers**: Dynamically planning and delegating subtasks
-7. **Evaluator-Optimizer**: Iterative improvement through feedback loops
-8. **Autonomous Agent**: Self-directed reasoning and tool usage
 
 ## 1. Augmented LLM Pattern
 

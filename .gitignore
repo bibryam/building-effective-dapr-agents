@@ -23,3 +23,4 @@ TestResults.xml
 /.idea/
 /.env
 /.venv/
+/TravelBuddy_state.json
