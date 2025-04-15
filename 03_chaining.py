@@ -10,13 +10,11 @@ using Dapr Agents framework with a mix of:
 """
 
 from dapr_agents.workflow import WorkflowApp, workflow, task
-from utils import WorkflowToolCallAgent
+from dapr_agents.agent.patterns.toolcall.base import ToolCallAgent
 from dapr_agents.types import DaprWorkflowContext
 from dotenv import load_dotenv
 from dapr_agents import tool
 from pydantic import BaseModel, Field
-
-load_dotenv()
 
 class SearchAttractionsSchema(BaseModel):
     city: str = Field(description="City to search for attractions")
@@ -43,7 +41,7 @@ def search_attractions(city: str, type: str) -> str:
     return ", ".join(attractions[city][type.lower()])
 
 # Agent configurations
-planning_agent = WorkflowToolCallAgent(
+planning_agent = ToolCallAgent(
     name="TravelPlanner",
     role="Travel Outline Developer",
     goal="Create structured travel outlines based on destination information",
@@ -52,7 +50,7 @@ planning_agent = WorkflowToolCallAgent(
     tools=[search_attractions]
 )
 
-itinerary_agent = WorkflowToolCallAgent(
+itinerary_agent = ToolCallAgent(
     name="ItineraryCreator",
     role="Detailed Itinerary Developer",
     goal="Expand travel outlines into comprehensive itineraries",
@@ -99,6 +97,7 @@ def travel_planning_workflow(ctx: DaprWorkflowContext, user_input: str):
 def extract_destination(user_input: str) -> str:
     pass  # Implementation handled by the prompt
 
+# Task with an Agent and tools
 @task(agent=planning_agent,
       description="""
       Create a day-by-day travel outline for a trip based on this information: {destination_text}
@@ -144,4 +143,5 @@ def main():
     print("============================================")
 
 if __name__ == "__main__":
+    load_dotenv()
     main()

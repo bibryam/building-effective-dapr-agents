@@ -9,6 +9,7 @@ using Dapr Agents framework. The pattern showcases:
 
 """
 
+import asyncio
 from typing import List
 from pydantic import BaseModel, Field
 from dapr_agents import tool, Agent
@@ -33,8 +34,7 @@ def search_flights(destination: str) -> List[FlightOption]:
         FlightOption(airline="GlobalWings", price=375.50)
     ]
 
-def main():
-    load_dotenv()
+async def run_agent():
 
     # Create agent with memory and tools
     travel_planner = Agent(
@@ -46,13 +46,15 @@ def main():
 
     # First interaction
     print("\n--- First interaction ---")
-    response = travel_planner.run("I want to visit Paris")
-    print(response)
-
+    await travel_planner.run("I want to visit Paris")
+    
     # Second interaction (uses memory and tool)
     print("\n--- Second interaction (uses memory and tool) ---")
-    response = travel_planner.run("Show me flights")
-    print(response)
+    await travel_planner.run("Show me flights")
+
+def main():
+    asyncio.run(run_agent())
 
 if __name__ == "__main__":
+    load_dotenv()
     main()

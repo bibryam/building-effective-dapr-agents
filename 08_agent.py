@@ -6,6 +6,7 @@ This example demonstrates the Autonomous Agent pattern from Anthropic's "Buildin
 using Dapr Agents framework with a simplified ReActAgent implementation.
 """
 
+import asyncio
 from dapr_agents import tool, ReActAgent
 from dotenv import load_dotenv
 
@@ -31,7 +32,7 @@ def find_activities(city: str) -> str:
     }
     return activities.get(city.lower(), "Activity data not available")
 
-def main():
+async def run_agent():
     # Create the ReAct agent with both tools
     travel_agent = ReActAgent(
         name="TravelHelper",
@@ -45,8 +46,11 @@ def main():
     print("The agent will decide which information to get first.\n")
 
     # Example query that requires both tools
-    result = travel_agent.run("I'm planning a trip to Paris. What should I know?")
+    result = await travel_agent.run("I'm planning a trip to Paris. What should I know?")
     print(f"Result: {result}")
+
+def main():
+    asyncio.run(run_agent())
 
 if __name__ == "__main__":
     main()

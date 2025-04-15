@@ -15,9 +15,6 @@ from dapr_agents.types import DaprWorkflowContext
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
@@ -96,6 +93,7 @@ def synthesize_travel_plan(request: str, results: List[Dict[str, Any]]) -> str:
     pass
 
 if __name__ == "__main__":
+    load_dotenv()
     wfapp = WorkflowApp()
 
     # Example complex travel request
@@ -120,11 +118,7 @@ if __name__ == "__main__":
     )
 
     if result:
-        # Display a preview of the result
-        preview_length = min(500, len(result))
-        print("\nFinal Travel Plan (preview):")
-        print(f"{result[:preview_length]}...")
-        if len(result) > preview_length:
-            print("...(truncated)")
+        print("\nFinal Travel Plan:")
+        print(f"{result}")
 
     print("\nOrchestrator-Workers Pattern completed successfully!")

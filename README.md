@@ -7,8 +7,10 @@ These examples show how to implement each pattern using the [Dapr Agents framewo
 ## Prerequisites
 
 - Python 3.10+
+- Docker installed
 - Dapr CLI installed
 - OpenAI API key
+
 
 ## Setup
 

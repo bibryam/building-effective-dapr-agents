@@ -8,6 +8,7 @@ specialized handlers based on the query type.
 """
 
 import logging
+import sys
 from enum import Enum
 from typing import Optional
 
@@ -18,6 +19,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
+
+# Setup a custom logger that outputs to console
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.INFO)
+console_logger = logging.getLogger("console")
+console_logger.setLevel(logging.INFO)
+console_logger.addHandler(console_handler)
+console_logger.propagate = False
 
 # Define query types for the router
 class QueryType(str, Enum):
@@ -60,19 +69,39 @@ def travel_assistant_workflow(ctx: DaprWorkflowContext, input_params: dict):
             handle_attractions_query,
             input={"query": user_query}
         )
+        # Print directly to ensure visibility
+        print("\n" + "*" * 80, file=sys.stdout, flush=True)
+        print(f"ATTRACTIONS RESPONSE:", file=sys.stdout, flush=True)
+        print(response, file=sys.stdout, flush=True)
+        print("*" * 80 + "\n", file=sys.stdout, flush=True)
     elif query_type == QueryType.ACCOMMODATIONS:
         response = yield ctx.call_activity(
             handle_accommodations_query,
             input={"query": user_query}
         )
+        # Print directly to ensure visibility
+        print("\n" + "*" * 80, file=sys.stdout, flush=True)
+        print(f"ACCOMMODATIONS RESPONSE:", file=sys.stdout, flush=True)
+        print(response, file=sys.stdout, flush=True)
+        print("*" * 80 + "\n", file=sys.stdout, flush=True)
     elif query_type == QueryType.TRANSPORTATION:
         response = yield ctx.call_activity(
             handle_transportation_query,
             input={"query": user_query}
         )
+        # Print directly to ensure visibility
+        print("\n" + "*" * 80, file=sys.stdout, flush=True)
+        print(f"TRANSPORTATION RESPONSE:", file=sys.stdout, flush=True)
+        print(response, file=sys.stdout, flush=True)
+        print("*" * 80 + "\n", file=sys.stdout, flush=True)
     else:
         # Fallback if the query type is not recognized
         response = "I'm not sure how to help with that specific travel question."
+        # Print directly to ensure visibility
+        print("\n" + "*" * 80, file=sys.stdout, flush=True)
+        print(f"UNKNOWN QUERY RESPONSE:", file=sys.stdout, flush=True)
+        print(response, file=sys.stdout, flush=True)
+        print("*" * 80 + "\n", file=sys.stdout, flush=True)
 
     return response
 
@@ -110,22 +139,27 @@ if __name__ == "__main__":
         "What's the best way to get around Paris using public transportation?"
     ]
 
-    print("=== ROUTING PATTERN DEMONSTRATION ===")
+    print("\n=== ROUTING PATTERN DEMONSTRATION ===")
     print("This example shows how to route different types of travel queries to specialized handlers\n")
 
     # Process each query to demonstrate routing
     for i, query in enumerate(queries, 1):
-        print(f"Query {i}: {query}")
+        print(f"\nQuery {i}: {query}")
+        
         result = wfapp.run_and_monitor_workflow(
             travel_assistant_workflow,
             input={"query": query}
         )
-
+        
+        # Output to custom console logger
+        console_logger.info("\n" + "=" * 50)
+        console_logger.info(f"RESPONSE TO QUERY {i}:")
+        console_logger.info(result)
+        console_logger.info("=" * 50 + "\n")
+        
         if result:
-            preview_length = min(200, len(result))
-            print(f"Response: {result[:preview_length]}")
-            if len(result) > preview_length:
-                print("...")
-            print("")
-
+            print(f"\n=== RESPONSE ===\n{result}\n")
+        else:
+            print("\n=== ERROR: No response received ===\n")
+    
     print("Routing Pattern completed successfully!")

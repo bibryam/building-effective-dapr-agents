@@ -24,3 +24,5 @@ TestResults.xml
 /.env
 /.venv/
 /TravelBuddy_state.json
+
+__pycache__

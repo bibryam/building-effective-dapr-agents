@@ -9,6 +9,7 @@ and provides feedback in a loop until the plan meets quality criteria.
 
 import logging
 from typing import Dict, Any, List
+import json
 
 from dapr_agents.workflow import WorkflowApp, workflow, task
 from dapr_agents.types import DaprWorkflowContext
@@ -24,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 # Define models for the evaluation process
 class Evaluation(BaseModel):
     """Evaluation of a travel plan with feedback for improvement."""
-    score: int = Field(..., description="Quality score from 1-10", ge=1, le=10)
+    score: int = Field(..., description="Quality score from 1-10")
     feedback: List[str] = Field(..., description="Specific feedback points for improvement")
     meets_criteria: bool = Field(..., description="Whether the plan meets all required criteria")
 
@@ -144,16 +145,30 @@ if __name__ == "__main__":
     )
 
     if result:
-        final_plan = result.get("final_plan", "")
-        iterations = result.get("iterations", 0)
-        final_score = result.get("final_evaluation", {}).get("score", 0)
-
-        print(f"\nFinal travel plan after {iterations} iterations (final score: {final_score}/10):")
-
-        # Display a preview of the result
-        preview_length = min(500, len(final_plan))
-        print(f"\n{final_plan[:preview_length]}...")
-        if len(final_plan) > preview_length:
-            print("...(truncated)")
+        # Handle different result types
+        if isinstance(result, dict):
+            final_plan = result.get("final_plan", "")
+            iterations = result.get("iterations", 0)
+            final_score = result.get("final_evaluation", {}).get("score", 0)
+            
+            print(f"\nFinal travel plan after {iterations} iterations (final score: {final_score}/10):")
+        elif isinstance(result, str):
+            # Try to parse JSON if it's a string
+            try:
+                result_dict = json.loads(result)
+                final_plan = result_dict.get("final_plan", "")
+                iterations = result_dict.get("iterations", 0)
+                final_score = result_dict.get("final_evaluation", {}).get("score", 0)
+                
+                print(f"\nFinal travel plan after {iterations} iterations (final score: {final_score}/10):")
+            except json.JSONDecodeError:
+                # If not valid JSON, use the string directly
+                final_plan = result
+                print("\nFinal travel plan:")
+        else:
+            final_plan = str(result)
+            print("\nFinal travel plan:")
+            
+        print(f"\n{final_plan}")
 
     print("\nEvaluator-Optimizer Pattern completed successfully!")

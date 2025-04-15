@@ -12,7 +12,6 @@ from dapr_agents.types import DaprWorkflowContext
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 # Define models for the travel plan components
@@ -100,6 +99,7 @@ def create_travel_plan(destination: str, attractions: TravelComponent, accommoda
     pass
 
 if __name__ == "__main__":
+    load_dotenv()
     wfapp = WorkflowApp()
 
     destination = "Paris"
