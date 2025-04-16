@@ -2,7 +2,7 @@
 
 This repository demonstrates implementations of various agent patterns based on Anthropic's research paper [Building Effective Agents](https://www.anthropic.com/research/building-effective-agents). The paper highlights how successful implementations use simple, composable patterns rather than complex frameworks.
 
-These examples show how to implement each pattern using the [Dapr Agents framework](https://dapr.github.io/dapr-agents/), which provides a clean, production-ready approach to building agent systems.
+These examples show how to implement each pattern using the [Dapr Agents framework](https://dapr.github.io/dapr-agents/), which provides a clean and familiar workflow approach to building agent systems.
 
 ## Prerequisites
 
@@ -38,8 +38,8 @@ This repository includes implementations of the following patterns:
 1. [**Augmented LLM**](#1-augmented-llm-pattern): The basic building block enhanced with memory and tools
 2. [**Stateful LLM**](#2-stateful-llm-pattern): Adding persistence and reliability to LLM agents
 3. [**Prompt Chaining**](#3-prompt-chaining-pattern): Breaking complex tasks into sequential steps
-4. [**Parallelization**](#4-parallelization-pattern): Processing multiple aspects of a task simultaneously
-5. [**Routing**](#5-routing-pattern): Directing inputs to specialized handlers
+4. [**Routing**](#4-routing-pattern): Directing inputs to specialized handlers
+5. [**Parallelization**](#5-parallelization-pattern): Processing multiple aspects of a task simultaneously
 6. [**Orchestrator-Workers**](#6-orchestrator-workers-pattern): Dynamically planning and delegating subtasks
 7. [**Evaluator-Optimizer**](#7-evaluator-optimizer-pattern): Iterative improvement through feedback loops
 8. [**Autonomous Agent**](#8-autonomous-agent-pattern): Self-directed reasoning and tool usage
@@ -88,6 +88,11 @@ The key components of this implementation are:
     - Instructions that guide its behavior
     - Access to the defined tools
 
+When the user asks for flights without specifying a destination in the second interaction, the agent:
+- Recalls the previously mentioned destination (Paris) from memory
+- Invokes the flight search tool with "Paris" as the parameter
+- Presents the flight options in a natural, conversational format
+
 ## 2. Stateful LLM Pattern
 
 ### Pattern Overview
@@ -103,6 +108,7 @@ The Stateful LLM pattern extends the Augmented LLM pattern by adding persistence
 - **Distributed Systems**: Applications running across multiple services or regions
 - **Customer Support**: Handling complex multi-session support tickets that might span days
 - **Business Processes**: Implementing business workflows with LLM intelligence at each step
+- **Complaint Resolution**: Managing multi-stage resolution processes that require different departments
 
 ### Implementation
 
@@ -155,6 +161,14 @@ The key components of this implementation are:
 
 4. **Service Exposure**: The agent exposes REST endpoints to start and manage workflows.
 
+### Key Differences from Augmented LLM Pattern
+
+- **Persistence**: State survives across restarts, unlike the in-memory state of basic agents
+- **Reliability**: Automatic failure recovery and retry mechanisms
+- **API Access**: REST endpoints for workflow management
+- **Observability**: Ability to track and monitor workflow progress
+- **Durability**: Can handle long-running tasks spanning minutes, hours, or days
+
 ## 3. Prompt Chaining Pattern
 
 ### Pattern Overview
@@ -179,6 +193,11 @@ This example demonstrates a travel planning workflow that:
 3. Generates a travel outline (using agent with tools)
 4. Expands the outline into a detailed itinerary (using agent without tools)
 
+The implementation showcases three different approaches to task execution:
+- Basic prompt-based task (no agent)
+- Agent-based task with tools
+- Agent-based task without tools
+
 Run the example:
 
 ```bash
@@ -201,6 +220,13 @@ The key components of this implementation are:
 
 4. **Tool Integration**: The planning agent uses a tool to search for attractions based on type.
 
+### When to Use This Pattern
+
+This pattern is ideal when:
+- Tasks can be naturally decomposed into sequential steps
+- Each step builds on the output of the previous step
+- You need validation between processing steps
+- You're willing to trade some latency for higher quality results
 
 ## 4. Routing Pattern
 
@@ -252,6 +278,13 @@ The key components of this implementation are:
     - Then routing to the appropriate specialized handler
     - Finally returning the response to the user
 
+### When to Use This Pattern
+
+This pattern is ideal when:
+- Tasks involve distinct categories that are better handled separately
+- Classification can be done accurately by an LLM
+- Different types of inputs benefit from specialized prompts
+- You want to optimize cost/performance by routing simpler queries to smaller models
 
 ## 5. Parallelization Pattern
 
@@ -298,6 +331,17 @@ The key components of this implementation are:
 
 4. **Structured Data Models**: Pydantic models define the structure of travel components, ensuring consistency across parallel tasks.
 
+This implementation demonstrates the core value of the Parallelization pattern: improved efficiency through concurrent processing of independent subtasks, with programmatic aggregation of results.
+
+### When to Use This Pattern
+
+This pattern is ideal when:
+- Tasks can be divided into independent subtasks
+- You need to process multiple aspects of a problem simultaneously
+- Speed is important, and parallelization can reduce overall latency
+- You want multiple perspectives on the same problem (voting variation)
+- Complex tasks benefit from focused attention on different aspects
+
 ## 6. Orchestrator-Workers Pattern
 
 ### Pattern Overview
@@ -341,6 +385,23 @@ The key components of this implementation are:
 
 4. **Flexible Architecture**: Unlike patterns with fixed workflows, this pattern adapts to each input by creating custom task plans.
 
+This implementation demonstrates the core value of the Orchestrator-Workers pattern: handling complex, open-ended problems by dynamically creating and executing subtask plans.
+
+### When to Use This Pattern
+
+This pattern is ideal when:
+- Tasks are complex and can't be broken into predefined subtasks
+- The number and nature of subtasks depend on the specific input
+- Specialized handling is needed for different aspects of a problem
+- Results need to be synthesized into a cohesive output
+
+### Key Differences from Parallelization
+
+Unlike the parallelization pattern where subtasks are predefined, the orchestrator-workers pattern:
+- Dynamically determines what subtasks are needed
+- Provides flexibility to handle a wide range of inputs
+- Can create varying numbers and types of subtasks based on the specific request
+
 ## 7. Evaluator-Optimizer Pattern
 
 ### Pattern Overview
@@ -355,16 +416,16 @@ The Evaluator-Optimizer pattern features two complementary LLM roles in a feedba
 - **Translation**: Improving literary translations that require nuanced understanding and expression
 - **Code Generation**: Creating code that meets specific requirements and handles edge cases
 - **Complex Search**: Multi-round information gathering and refinement
-- **Travel Planning**: Creating detailed itineraries that meet traveler preferences
+- **Travel Planning**: Creating itineraries that meet traveler preferences
 
 ### Implementation
 
-This example demonstrates an iterative travel planning workflow that:
-1. Takes a travel request as input
+This example demonstrates a simple travel planning workflow that:
+1. Takes a weekend trip request as input
 2. Uses a generator LLM to create an initial travel plan
-3. Uses an evaluator LLM to assess the plan and provide specific feedback
-4. Iteratively improves the plan based on evaluation feedback
-5. Terminates when the plan meets quality criteria or reaches maximum iterations
+3. Uses an evaluator LLM to assess the plan and provide feedback
+4. Improves the plan based on evaluation feedback
+5. Terminates after feedback is incorporated or reaches maximum iterations
 
 Run the example:
 
@@ -377,10 +438,27 @@ dapr run --app-id evaluator-optimizer --resources-path components/ -- python 07_
 
 The key components of this implementation are:
 
-1. **Generator LLM**: Creates or refines content based on input requirements and feedback
-2. **Evaluator LLM**: Analyzes content against specific criteria and provides structured feedback
-3. **Feedback Loop**: Enables multiple rounds of generation and evaluation
-4. **Quality Criteria**: Defines when the process should terminate with measurable metrics
+1. **Generator LLM**: Creates or refines a travel plan based on user request and feedback
+2. **Evaluator LLM**: Scores the plan and provides structured feedback for improvement
+3. **Feedback Loop**: Enables a simple round of generation and evaluation
+4. **Quality Criteria**: Checks if the plan meets requirements or needs further refinement
+
+The implementation demonstrates how multiple LLMs can work together in a feedback loop to improve content quality - in this case, a simple weekend trip to San Francisco.
+
+### When to Use This Pattern
+
+This pattern is ideal when:
+- There are clear evaluation criteria for the generated content
+- Iterative refinement improves output quality
+- LLM responses can be improved through explicit feedback
+- Quality is more important than latency or cost
+
+### Key Benefits
+
+- Produces higher quality outputs through evaluation and refinement
+- Allows for clear articulation of quality standards
+- Enables improvement of generated content
+- Mimics the human editing process
 
 ## 8. Autonomous Agent Pattern
 
@@ -431,6 +509,25 @@ The key components of this implementation are:
     - Which tools to use
     - In what order to call them
     - When it has sufficient information to respond
+
+This implementation demonstrates the core value of the Autonomous Agent pattern: enabling dynamic, adaptive problem-solving without predefined workflows.
+
+### When to Use This Pattern
+
+This pattern is ideal when:
+- Tasks require sequentially dependent steps
+- Tool usage decisions depend on previous observations
+- The workflow can't be predetermined
+- Human intervention should be minimized
+- Adaptability to changing circumstances is required
+
+### Key Benefits
+
+- Provides flexibility to handle diverse inputs
+- Adapts approach based on gathered information
+- Makes tool usage decisions dynamically
+- Mimics human reasoning and problem-solving
+- Requires minimal external orchestration
 
 ## References
 

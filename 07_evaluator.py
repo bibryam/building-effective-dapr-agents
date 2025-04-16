@@ -3,11 +3,11 @@
 Evaluator-Optimizer Pattern demonstrates:
 1. How to use an LLM to generate output
 2. How to use another LLM to provide evaluation and feedback in a loop
-3. Control execution duration until the plan meets quality criteria or certain number of iterations
+3. Control execution until quality criteria are met or maximum iterations reached
 """
 
 import logging
-from typing import Dict, Any, List
+from typing import List
 import json
 
 from dapr_agents.workflow import WorkflowApp, workflow, task
@@ -20,19 +20,18 @@ class Evaluation(BaseModel):
     """Evaluation of a travel plan with feedback for improvement."""
     score: int = Field(..., description="Quality score from 1-10")
     feedback: List[str] = Field(..., description="Specific feedback points for improvement")
-    meets_criteria: bool = Field(..., description="Whether the plan meets all required criteria")
+    meets_criteria: bool = Field(..., description="Whether the plan meets all criteria")
 
 # Define Workflow logic
 @workflow(name="evaluator_optimizer_travel_planner")
 def evaluator_optimizer_travel_planner(ctx: DaprWorkflowContext, input_params: dict):
-    """Defines a Dapr workflow that iteratively improves a travel plan through evaluation and feedback."""
+    """Simple Dapr workflow for a travel plan using evaluator-optimizer pattern."""
 
     # Extract parameters
     travel_request = input_params.get("request")
-    max_iterations = input_params.get("max_iterations", 3)
-    score_threshold = input_params.get("score_threshold", 8)
-
-    print(f"Starting Evaluator-Optimizer workflow for travel request")
+    max_iterations = input_params.get("max_iterations", 2)
+    
+    print("Starting travel planner with Evaluator-Optimizer pattern")
 
     # Generate initial travel plan
     print("Generating initial travel plan...")
@@ -41,13 +40,12 @@ def evaluator_optimizer_travel_planner(ctx: DaprWorkflowContext, input_params: d
         input={"request": travel_request, "feedback": None}
     )
 
-    # Evaluation loop
+    # Evaluation loop - simplified to just two iterations
     iteration = 1
     meets_criteria = False
-    evaluation_results = None
 
     while iteration <= max_iterations and not meets_criteria:
-        print(f"Iteration {iteration}: Evaluating travel plan...")
+        print(f"Evaluating travel plan (iteration {iteration})...")
 
         # Evaluate the current plan
         evaluation = yield ctx.call_activity(
@@ -59,21 +57,16 @@ def evaluator_optimizer_travel_planner(ctx: DaprWorkflowContext, input_params: d
         feedback = evaluation.get("feedback", [])
         meets_criteria = evaluation.get("meets_criteria", False)
 
-        print(f"Evaluation score: {score}/10")
-        print(f"Meets criteria: {meets_criteria}")
-
+        print(f"Score: {score}/10, Meets criteria: {meets_criteria}")
         if feedback:
-            feedback_str = "\n- ".join([""] + feedback)
-            print(f"Feedback:{feedback_str}")
-
-        evaluation_results = evaluation
-
-        # Check if we should continue optimizing
-        if meets_criteria or score >= score_threshold or iteration >= max_iterations:
+            print(f"Feedback: {', '.join(feedback)}")
+        
+        # Stop if we meet criteria or reached max iterations
+        if meets_criteria or iteration >= max_iterations:
             break
 
         # Optimize the plan based on feedback
-        print(f"Iteration {iteration}: Optimizing travel plan based on feedback...")
+        print(f"Optimizing plan based on feedback...")
         current_plan = yield ctx.call_activity(
             generate_travel_plan,
             input={"request": travel_request, "feedback": feedback}
@@ -81,27 +74,19 @@ def evaluator_optimizer_travel_planner(ctx: DaprWorkflowContext, input_params: d
 
         iteration += 1
 
-    # Final assessment
-    if meets_criteria:
-        print("Travel plan meets all criteria!")
-    elif evaluation_results and evaluation_results.get("score", 0) >= score_threshold:
-        print(f"Travel plan reached acceptable quality score: {evaluation_results.get('score')}/10")
-    else:
-        print(f"Reached maximum iterations ({max_iterations}). Using best plan so far.")
-
     return {
         "final_plan": current_plan,
         "iterations": iteration,
-        "final_evaluation": evaluation_results
+        "final_score": score
     }
 
-@task(description="Create a comprehensive travel plan for this request: {request}. If feedback is provided, incorporate these improvements: {feedback}")
+@task(description="Create a travel plan for: {request}. If provided, incorporate this feedback: {feedback}")
 def generate_travel_plan(request: str, feedback: List[str] = None) -> str:
-    """Generates or optimizes a travel plan based on the request and any feedback."""
+    """Generates or optimizes a travel plan based on the request and feedback."""
     # This will be implemented as an LLM call by the framework
     pass
 
-@task(description="Evaluate this travel plan for the given request. Provide a score (1-10), specific feedback for improvement, and whether it meets all criteria. Request: {request} | Plan: {plan}")
+@task(description="Evaluate this travel plan. Provide a score (1-10), feedback for improvement, and whether it meets criteria. Request: {request} | Plan: {plan}")
 def evaluate_travel_plan(request: str, plan: str) -> Evaluation:
     """Evaluates a travel plan and provides feedback for improvement."""
     # This will be implemented as an LLM call by the framework
@@ -110,24 +95,19 @@ def evaluate_travel_plan(request: str, plan: str) -> Evaluation:
 def main():
     wfapp = WorkflowApp()
 
-    # Example travel request
+    # Example travel request - simplified
     travel_request = """
-    I'm planning a 4-day cultural trip to Kyoto, Japan next spring during cherry blossom season. 
-    I'm interested in traditional temples, Japanese gardens, authentic cuisine, and cultural experiences 
-    like tea ceremonies. I prefer a mix of famous sites and off-the-beaten-path locations. 
-    I'd like to stay at a traditional ryokan for at least part of my stay, and I'm looking for 
-    a balance of scheduled activities and time to wander. My budget is mid-range.
+    I want a weekend trip to San Francisco. I like museums, good food, 
+    and walking tours. My budget is moderate.
     """
 
-    print("=== EVALUATOR-OPTIMIZER PATTERN DEMONSTRATION ===")
-    print("This example shows how a travel plan is iteratively improved through evaluation and feedback")
-    print("\nTravel request:")
+    print("=== EVALUATOR-OPTIMIZER PATTERN DEMO ===")
+    print("Travel request:")
     print(travel_request)
 
     workflow_params = {
         "request": travel_request,
-        "max_iterations": 3,
-        "score_threshold": 8
+        "max_iterations": 2
     }
 
     result = wfapp.run_and_monitor_workflow(
@@ -136,33 +116,27 @@ def main():
     )
 
     if result:
-        # Handle different result types
-        if isinstance(result, dict):
-            final_plan = result.get("final_plan", "")
-            iterations = result.get("iterations", 0)
-            final_score = result.get("final_evaluation", {}).get("score", 0)
-            
-            print(f"\nFinal travel plan after {iterations} iterations (final score: {final_score}/10):")
-        elif isinstance(result, str):
-            # Try to parse JSON if it's a string
+        # Convert string result to dictionary if needed
+        if isinstance(result, str):
             try:
-                result_dict = json.loads(result)
-                final_plan = result_dict.get("final_plan", "")
-                iterations = result_dict.get("iterations", 0)
-                final_score = result_dict.get("final_evaluation", {}).get("score", 0)
-                
-                print(f"\nFinal travel plan after {iterations} iterations (final score: {final_score}/10):")
-            except json.JSONDecodeError:
-                # If not valid JSON, use the string directly
+                import json
+                result = json.loads(result)
+            except:
                 final_plan = result
                 print("\nFinal travel plan:")
-        else:
-            final_plan = str(result)
-            print("\nFinal travel plan:")
-            
+                print(f"\n{final_plan}")
+                print("\nEvaluator-Optimizer Pattern completed!")
+                return
+                
+        # Handle dictionary result
+        final_plan = result.get("final_plan", "")
+        iterations = result.get("iterations", 0)
+        final_score = result.get("final_score", 0)
+        
+        print(f"\nFinal travel plan after {iterations} iterations (score: {final_score}/10):")
         print(f"\n{final_plan}")
 
-    print("\nEvaluator-Optimizer Pattern completed successfully!")
+    print("\nEvaluator-Optimizer Pattern completed!")
 
 if __name__ == "__main__":
     load_dotenv()
