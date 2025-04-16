@@ -75,6 +75,8 @@ This example demonstrates a simple travel planning assistant that:
 1. Remembers user context (desired travel destination)
 2. Uses a tool to search for flight options to that destination
 
+[Source code: 01_augmented_llm.py](01_augmented_llm.py)
+
 Run the example:
 
 ```bash
@@ -128,6 +130,8 @@ This example demonstrates a stateful travel planning assistant that:
 2. Uses a tool to search for flight options
 3. Exposes a REST API for workflow interaction
 4. Stores execution state in Dapr workflow state stores
+
+[Source code: 02_stateful_llm.py](02_stateful_llm.py)
 
 Run the example:
 
@@ -208,6 +212,8 @@ The implementation showcases three different approaches to task execution:
 - Agent-based task with tools
 - Agent-based task without tools
 
+[Source code: 03_chaining.py](03_chaining.py)
+
 Run the example:
 
 ```bash
@@ -263,6 +269,8 @@ This example demonstrates a travel assistant that:
     - Transportation (getting around, travel logistics)
 3. Routes the query to a specialized handler optimized for that category
 4. Returns a detailed response from the appropriate specialist
+
+[Source code: 04_routing.py](04_routing.py)
 
 Run the example:
 
@@ -320,6 +328,8 @@ This example demonstrates a travel planning workflow that:
    - Transportation options
 3. Aggregates the results into a comprehensive travel plan
 
+[Source code: 05_parallelization.py](05_parallelization.py)
+
 Run the example:
 
 ```bash
@@ -369,6 +379,8 @@ This example demonstrates a travel planning workflow that:
 2. Uses an orchestrator LLM to analyze the request and determine required subtasks
 3. Dispatches each subtask to worker LLMs that handle specific aspects of the travel plan
 4. Uses a synthesizer LLM to combine all worker outputs into a comprehensive travel plan
+
+[Source code: 06_orchestrator.py](06_orchestrator.py)
 
 Run the example:
 
@@ -429,6 +441,8 @@ This example demonstrates a simple travel planning workflow that:
 4. Improves the plan based on evaluation feedback
 5. Terminates after feedback is incorporated or reaches maximum iterations
 
+[Source code: 07_evaluator.py](07_evaluator.py)
+
 Run the example:
 
 ```bash
@@ -476,6 +490,8 @@ This example demonstrates a simple travel assistant that:
 2. Uses the ReAct (Reasoning-Action) framework to determine what information is needed
 3. Dynamically decides which tools to call and in what order
 4. Synthesizes gathered information into a comprehensive response
+
+[Source code: 08_agent.py](08_agent.py)
 
 Run the example:
 
