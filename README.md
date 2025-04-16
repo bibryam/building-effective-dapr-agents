@@ -1,16 +1,25 @@
 # Building Effective Dapr Agents
 
-This repository demonstrates implementations of various agent patterns based on Anthropic's research paper [Building Effective Agents](https://www.anthropic.com/research/building-effective-agents). The paper highlights how successful implementations use simple, composable patterns rather than complex frameworks.
+This repository demonstrates implementations of agent patterns based on Anthropic's research paper [Building Effective Agents](https://www.anthropic.com/research/building-effective-agents). The paper emphasizes that successful agent implementations use simple, composable patterns rather than complex frameworks.
 
-These examples show how to implement each pattern using the [Dapr Agents framework](https://dapr.github.io/dapr-agents/), which provides a clean and familiar workflow approach to building agent systems.
+These examples showcase how to implement these patterns using the [Dapr Agents framework](https://dapr.github.io/dapr-agents/), which provides a clean workflow approach to building agent systems.
+
+## Why Dapr for Agents?
+
+Dapr brings unique advantages to agent implementation:
+
+- **Workflow Orchestration**: Durable, reliable execution of complex agent tasks
+- **Pub/Sub Messaging**: Event-driven communication between agent components
+- **State Management**: Built-in persistence with pluggable state stores
+- **LLM Abstraction**: Reliably and observable interactions with LLMs
+- **Platform Agnostic**: Runs locally or on any cloud platform
 
 ## Prerequisites
 
 - Python 3.10+
-- Docker installed
-- Dapr CLI installed
+- Docker
+- [Dapr CLI](https://docs.dapr.io/getting-started/install-dapr-cli/)
 - OpenAI API key
-
 
 ## Setup
 
@@ -31,7 +40,7 @@ pip install -r requirements.txt
 echo "OPENAI_API_KEY=your_api_key_here" > .env
 ```
 
-## Patterns Overview
+## Agent Patterns Overview
 
 This repository includes implementations of the following patterns:
  
@@ -97,6 +106,8 @@ When the user asks for flights without specifying a destination in the second in
 
 ### Pattern Overview
 
+> **Note:** This is not one of the Anthropic paper patterns, but it demonstrates how easy it is to turn the stateless pattern from the previous example into a durable one (by swapping Agent to AssistantAgent) and running it with a Dapr sidecar to get all the Dapr benefits. For the rest of the examples, we will use the sidecar approach to run the examples.
+
 The Stateful LLM pattern extends the Augmented LLM pattern by adding persistence, reliability, and workflow capabilities. This pattern enables LLMs to maintain state across sessions and handle long-running operations that can survive system restarts.
 
 ![02_stateful_llm.png](images/02_stateful_llm.png)
@@ -116,12 +127,11 @@ This example demonstrates a stateful travel planning assistant that:
 1. Remembers user context persistently (across restarts)
 2. Uses a tool to search for flight options
 3. Exposes a REST API for workflow interaction
-4. Stores execution state in Dapr state stores
+4. Stores execution state in Dapr workflow state stores
 
 Run the example:
 
 ```bash
-# Start the agent with Dapr
 dapr run --app-id stateful-llm --app-port 8001 --dapr-http-port 3500 --resources-path components/ -- python 02_stateful_llm.py
 ```
 
@@ -201,7 +211,6 @@ The implementation showcases three different approaches to task execution:
 Run the example:
 
 ```bash
-# Run with Dapr
 dapr run --app-id prompt-chaining --resources-path components/ -- python 03_chaining.py
 ```
 
@@ -258,7 +267,6 @@ This example demonstrates a travel assistant that:
 Run the example:
 
 ```bash
-# Run with Dapr
 dapr run --app-id routing --resources-path components/ -- python 04_routing.py
 ```
 
@@ -290,7 +298,7 @@ This pattern is ideal when:
 
 ### Pattern Overview
 
-The Parallelization pattern allows LLMs to work simultaneously on different aspects of a task, with outputs aggregated programmatically. This pattern manifests in two key variations: sectioning (breaking tasks into independent subtasks) and voting (running the same task multiple times for consensus).
+The Parallelization pattern allows LLMs to work simultaneously on different aspects of a task, with outputs aggregated programmatically. 
 
 ![Parallelization Pattern](images/04_parallelization.webp)
 
@@ -315,7 +323,6 @@ This example demonstrates a travel planning workflow that:
 Run the example:
 
 ```bash
-# Run with Dapr
 dapr run --app-id parallelization --resources-path components/ -- python 05_parallelization.py
 ```
 
@@ -329,8 +336,6 @@ The key components of this implementation are:
 
 3. **Result Aggregation**: Once all parallel tasks complete, their outputs are combined into a comprehensive travel plan by a final LLM call.
 
-4. **Structured Data Models**: Pydantic models define the structure of travel components, ensuring consistency across parallel tasks.
-
 This implementation demonstrates the core value of the Parallelization pattern: improved efficiency through concurrent processing of independent subtasks, with programmatic aggregation of results.
 
 ### When to Use This Pattern
@@ -340,7 +345,6 @@ This pattern is ideal when:
 - You need to process multiple aspects of a problem simultaneously
 - Speed is important, and parallelization can reduce overall latency
 - You want multiple perspectives on the same problem (voting variation)
-- Complex tasks benefit from focused attention on different aspects
 
 ## 6. Orchestrator-Workers Pattern
 
@@ -369,7 +373,6 @@ This example demonstrates a travel planning workflow that:
 Run the example:
 
 ```bash
-# Run with Dapr
 dapr run --app-id orchestrator --resources-path components/ -- python 06_orchestrator.py
 ```
 
@@ -416,7 +419,6 @@ The Evaluator-Optimizer pattern features two complementary LLM roles in a feedba
 - **Translation**: Improving literary translations that require nuanced understanding and expression
 - **Code Generation**: Creating code that meets specific requirements and handles edge cases
 - **Complex Search**: Multi-round information gathering and refinement
-- **Travel Planning**: Creating itineraries that meet traveler preferences
 
 ### Implementation
 
@@ -430,7 +432,6 @@ This example demonstrates a simple travel planning workflow that:
 Run the example:
 
 ```bash
-# Run with Dapr
 dapr run --app-id evaluator-optimizer --resources-path components/ -- python 07_evaluator.py
 ```
 
@@ -451,14 +452,7 @@ This pattern is ideal when:
 - There are clear evaluation criteria for the generated content
 - Iterative refinement improves output quality
 - LLM responses can be improved through explicit feedback
-- Quality is more important than latency or cost
-
-### Key Benefits
-
-- Produces higher quality outputs through evaluation and refinement
-- Allows for clear articulation of quality standards
-- Enables improvement of generated content
-- Mimics the human editing process
+ 
 
 ## 8. Autonomous Agent Pattern
 
@@ -470,9 +464,8 @@ The Autonomous Agent pattern features an LLM that dynamically directs its own pr
 
 ### Use Cases
 
-- **Travel Planning**: Gathering information and providing personalized recommendations
-- **Customer Support**: Resolving complex issues through information gathering and problem-solving
 - **Research Assistant**: Finding and synthesizing information from multiple sources
+- **Customer Support**: Resolving complex issues through information gathering and problem-solving
 - **Software Development**: Debugging and fixing issues across codebases
 - **Personal Assistant**: Handling scheduling, reminders, and information lookup tasks
 
@@ -487,7 +480,6 @@ This example demonstrates a simple travel assistant that:
 Run the example:
 
 ```bash
-# Run with Dapr
 dapr run --app-id agent --resources-path components/ -- python 08_agent.py
 ```
 
@@ -521,15 +513,9 @@ This pattern is ideal when:
 - Human intervention should be minimized
 - Adaptability to changing circumstances is required
 
-### Key Benefits
-
-- Provides flexibility to handle diverse inputs
-- Adapts approach based on gathered information
-- Makes tool usage decisions dynamically
-- Mimics human reasoning and problem-solving
-- Requires minimal external orchestration
-
+ 
 ## References
 
 - [Anthropic: Building Effective Agents](https://www.anthropic.com/research/building-effective-agents)
 - [Dapr Agents Documentation](https://dapr.github.io/dapr-agents/)
+- [Dapr Documentation](https://docs.dapr.io/)
