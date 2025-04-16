@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-Orchestrator-Workers Pattern - Travel Planner
-
-This example demonstrates the Orchestrator-Workers pattern from Anthropic's "Building Effective Agents"
-using Dapr Agents framework. It shows how a central orchestrator dynamically determines subtasks,
-delegates them to worker LLMs, and synthesizes their results.
+Orchestrator-Workers Pattern demonstrates:
+1. How a central orchestrator dynamically determines subtasks.
+2. Delegates dynamic tasks to worker LLMs.
+3. Synthesizes results back into a single result.
 """
 
 import logging
@@ -14,9 +13,6 @@ from dapr_agents.workflow import WorkflowApp, workflow, task
 from dapr_agents.types import DaprWorkflowContext
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
 
 # Define models for orchestration
 class TravelTask(BaseModel):
@@ -92,8 +88,7 @@ def synthesize_travel_plan(request: str, results: List[Dict[str, Any]]) -> str:
     # This will be implemented as an LLM call by the framework
     pass
 
-if __name__ == "__main__":
-    load_dotenv()
+def main():
     wfapp = WorkflowApp()
 
     # Example complex travel request
@@ -122,3 +117,8 @@ if __name__ == "__main__":
         print(f"{result}")
 
     print("\nOrchestrator-Workers Pattern completed successfully!")
+
+if __name__ == "__main__":
+    load_dotenv()
+    logging.basicConfig(level=logging.INFO)
+    main()

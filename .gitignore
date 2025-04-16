@@ -21,7 +21,6 @@ rad.json
 #Test results file
 TestResults.xml
 /.idea/
-/.env
 /.venv/
 /TravelBuddy_state.json
 

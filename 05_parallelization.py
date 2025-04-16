@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Parallelization Pattern - Travel Planner
-
-This example demonstrates the Parallelization pattern from Anthropic's "Building Effective Agents"
-using Dapr Agents framework. It shows how to process different aspects of a travel plan in parallel.
+Parallelization Pattern demonstrates:
+1. How to run parallel tasks with LLM calls
+2. How to wait for all tasks to complete
+3. How to merge the results into a single result
 """
 
 import logging
@@ -11,8 +11,6 @@ from dapr_agents.workflow import WorkflowApp, workflow, task
 from dapr_agents.types import DaprWorkflowContext
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
-
-logging.basicConfig(level=logging.INFO)
 
 # Define models for the travel plan components
 class TravelComponent(BaseModel):
@@ -98,8 +96,7 @@ def create_travel_plan(destination: str, attractions: TravelComponent, accommoda
     # This will be implemented as an LLM call by the framework
     pass
 
-if __name__ == "__main__":
-    load_dotenv()
+def main():
     wfapp = WorkflowApp()
 
     destination = "Paris"
@@ -123,3 +120,8 @@ if __name__ == "__main__":
         preview_length = min(500, len(results))
         print(f"\nPreview:\n{results[:preview_length]}...\n")
         print("Parallelization Pattern completed successfully!")
+
+if __name__ == "__main__":
+    load_dotenv()
+    logging.basicConfig(level=logging.INFO)
+    main()

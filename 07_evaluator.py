@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-Evaluator-Optimizer Pattern - Travel Planner
-
-This example demonstrates the Evaluator-Optimizer pattern from Anthropic's "Building Effective Agents"
-using Dapr Agents framework. It shows how one LLM generates a travel plan while another evaluates
-and provides feedback in a loop until the plan meets quality criteria.
+Evaluator-Optimizer Pattern demonstrates:
+1. How to use an LLM to generate output
+2. How to use another LLM to provide evaluation and feedback in a loop
+3. Control execution duration until the plan meets quality criteria or certain number of iterations
 """
 
 import logging
@@ -15,12 +14,6 @@ from dapr_agents.workflow import WorkflowApp, workflow, task
 from dapr_agents.types import DaprWorkflowContext
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
 
 # Define models for the evaluation process
 class Evaluation(BaseModel):
@@ -114,7 +107,7 @@ def evaluate_travel_plan(request: str, plan: str) -> Evaluation:
     # This will be implemented as an LLM call by the framework
     pass
 
-if __name__ == "__main__":
+def main():
     wfapp = WorkflowApp()
 
     # Example travel request
@@ -128,11 +121,9 @@ if __name__ == "__main__":
 
     print("=== EVALUATOR-OPTIMIZER PATTERN DEMONSTRATION ===")
     print("This example shows how a travel plan is iteratively improved through evaluation and feedback")
-
     print("\nTravel request:")
     print(travel_request)
 
-    print("\nStarting evaluator-optimizer workflow...")
     workflow_params = {
         "request": travel_request,
         "max_iterations": 3,
@@ -172,3 +163,8 @@ if __name__ == "__main__":
         print(f"\n{final_plan}")
 
     print("\nEvaluator-Optimizer Pattern completed successfully!")
+
+if __name__ == "__main__":
+    load_dotenv()
+    logging.basicConfig(level=logging.INFO)
+    main()

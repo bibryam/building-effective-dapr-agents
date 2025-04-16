@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 """
-Augmented LLM Pattern
-
-This example demonstrates the Augmented LLM pattern from Anthropic's "Building Effective Agents"
-using Dapr Agents framework. The pattern showcases:
+Augmented LLM Pattern demonstrates:
 1. Memory - remembering user preferences
 2. Tool use - accessing external data
-
+3. LLM abstraction
 """
 
 import asyncio
+import logging
 from typing import List
 from pydantic import BaseModel, Field
 from dapr_agents import tool, Agent
@@ -34,8 +32,7 @@ def search_flights(destination: str) -> List[FlightOption]:
         FlightOption(airline="GlobalWings", price=375.50)
     ]
 
-async def run_agent():
-
+async def main():
     # Create agent with memory and tools
     travel_planner = Agent(
         name="TravelBuddy",
@@ -52,9 +49,7 @@ async def run_agent():
     print("\n--- Second interaction (uses memory and tool) ---")
     await travel_planner.run("Show me flights")
 
-def main():
-    asyncio.run(run_agent())
-
 if __name__ == "__main__":
     load_dotenv()
-    main()
+    logging.basicConfig(level=logging.INFO)
+    asyncio.run(main())

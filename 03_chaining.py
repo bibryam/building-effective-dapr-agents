@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
-Prompt Chaining Pattern - Travel Planner
-
-This example demonstrates the Prompt Chaining pattern from Anthropic's "Building Effective Agents"
-using Dapr Agents framework with a mix of:
+Prompt Chaining Pattern demonstrates:
 1. Agent-based tasks with tools
 2. Agent-based tasks without tools
 3. Simple prompt-based tasks
+4. Chaining tasks sequentially using durable workflow steps
 """
 
+import logging
 from dapr_agents.workflow import WorkflowApp, workflow, task
 from dapr_agents.agent.patterns.toolcall.base import ToolCallAgent
 from dapr_agents.types import DaprWorkflowContext
@@ -144,4 +143,5 @@ def main():
 
 if __name__ == "__main__":
     load_dotenv()
+    logging.basicConfig(level=logging.INFO)
     main()

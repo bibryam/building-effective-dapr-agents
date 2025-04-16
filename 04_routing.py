@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """
-Routing Pattern - Travel Assistant
-
-This example demonstrates the Routing pattern from Anthropic's "Building Effective Agents"
-using Dapr Agents framework. It shows how to classify a travel query and route it to
-specialized handlers based on the query type.
+Routing Pattern demonstrates:
+1. How to use familiar programming if-else construct to define workflow logic
+2. How to classify a user query and route to it
 """
 
 import logging
@@ -16,9 +14,6 @@ from dapr_agents.workflow import WorkflowApp, workflow, task
 from dapr_agents.types import DaprWorkflowContext
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
-
-load_dotenv()
-logging.basicConfig(level=logging.INFO)
 
 # Setup a custom logger that outputs to console
 console_handler = logging.StreamHandler(sys.stdout)
@@ -129,7 +124,7 @@ def handle_transportation_query(query: str) -> str:
     # This will be implemented as an LLM call by the framework
     pass
 
-if __name__ == "__main__":
+def main():
     wfapp = WorkflowApp()
 
     # Example travel queries for different types
@@ -163,3 +158,8 @@ if __name__ == "__main__":
             print("\n=== ERROR: No response received ===\n")
     
     print("Routing Pattern completed successfully!")
+
+if __name__ == "__main__":
+    load_dotenv()
+    logging.basicConfig(level=logging.INFO)
+    main()

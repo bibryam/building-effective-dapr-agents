@@ -140,25 +140,6 @@ You'll receive a workflow ID in response, which you can use to track progress.
 curl -i -X GET http://localhost:3500/v1.0/workflows/durableTaskHub/WORKFLOW_ID
 ```
 
-#### Monitor progress in real-time:
-
-```bash
-watch -n 2 'curl -s -X GET http://localhost:3500/v1.0/workflows/durableTaskHub/WORKFLOW_ID'
-```
-
-#### Direct message to the agent:
-
-```bash
-curl -X POST http://localhost:3500/v1.0/publish/messagepubsub/TravelBuddy \
-  -H "Content-Type: application/json" \
-  -d '{
-    "data": {
-      "text": "Find me flights to Paris",
-      "sender": "user123"
-    }
-  }'
-```
-
 ### How It Works
 
 The key components of this implementation are:
@@ -220,52 +201,8 @@ The key components of this implementation are:
 
 4. **Tool Integration**: The planning agent uses a tool to search for attractions based on type.
 
-## 4. Parallelization Pattern
 
-### Pattern Overview
-
-The Parallelization pattern allows LLMs to work simultaneously on different aspects of a task, with outputs aggregated programmatically. This pattern manifests in two key variations: sectioning (breaking tasks into independent subtasks) and voting (running the same task multiple times for consensus).
-
-![Parallelization Pattern](images/04_parallelization.webp)
-
-### Use Cases
-
-- **Complex Research**: Processing different aspects of a research topic simultaneously
-- **Content Creation**: Generating multiple sections of a document in parallel
-- **Decision Making**: Collecting multiple perspectives on the same problem (voting)
-- **Multi-faceted Planning**: Creating various elements of a plan concurrently
-- **Product Analysis**: Analyzing different aspects of a product in parallel
-
-### Implementation
-
-This example demonstrates a travel planning workflow that:
-1. Takes a user's travel request as input
-2. Processes three aspects in parallel:
-    - Attractions research
-    - Accommodation recommendations
-    - Transportation options
-3. Aggregates the results into a comprehensive travel plan
-
-Run the example:
-
-```bash
-# Run with Dapr
-dapr run --app-id parallelization --resources-path components/ -- python 04_parallelization.py
-```
-
-### How It Works
-
-The key components of this implementation are:
-
-1. **Parallel Task Definition**: Three independent LLM tasks are defined to process different aspects of the travel planning problem.
-
-2. **Workflow Orchestration**: The Dapr workflow engine coordinates the parallel execution of these tasks, handling synchronization and aggregation.
-
-3. **Result Aggregation**: Once all parallel tasks complete, their outputs are combined into a comprehensive travel plan by a final LLM call.
-
-4. **Structured Data Models**: Pydantic models define the structure of travel components, ensuring consistency across parallel tasks.
-
-## 5. Routing Pattern
+## 4. Routing Pattern
 
 ### Pattern Overview
 
@@ -296,7 +233,7 @@ Run the example:
 
 ```bash
 # Run with Dapr
-dapr run --app-id routing --resources-path components/ -- python 05_routing.py
+dapr run --app-id routing --resources-path components/ -- python 04_routing.py
 ```
 
 ### How It Works
@@ -314,6 +251,52 @@ The key components of this implementation are:
     - First sending the query to the classifier
     - Then routing to the appropriate specialized handler
     - Finally returning the response to the user
+
+
+## 5. Parallelization Pattern
+
+### Pattern Overview
+
+The Parallelization pattern allows LLMs to work simultaneously on different aspects of a task, with outputs aggregated programmatically. This pattern manifests in two key variations: sectioning (breaking tasks into independent subtasks) and voting (running the same task multiple times for consensus).
+
+![Parallelization Pattern](images/04_parallelization.webp)
+
+### Use Cases
+
+- **Complex Research**: Processing different aspects of a research topic simultaneously
+- **Content Creation**: Generating multiple sections of a document in parallel
+- **Decision Making**: Collecting multiple perspectives on the same problem (voting)
+- **Multi-faceted Planning**: Creating various elements of a plan concurrently
+- **Product Analysis**: Analyzing different aspects of a product in parallel
+
+### Implementation
+
+This example demonstrates a travel planning workflow that:
+1. Takes a user's travel request as input
+2. Processes three aspects in parallel:
+   - Attractions research
+   - Accommodation recommendations
+   - Transportation options
+3. Aggregates the results into a comprehensive travel plan
+
+Run the example:
+
+```bash
+# Run with Dapr
+dapr run --app-id parallelization --resources-path components/ -- python 05_parallelization.py
+```
+
+### How It Works
+
+The key components of this implementation are:
+
+1. **Parallel Task Definition**: Three independent LLM tasks are defined to process different aspects of the travel planning problem.
+
+2. **Workflow Orchestration**: The Dapr workflow engine coordinates the parallel execution of these tasks, handling synchronization and aggregation.
+
+3. **Result Aggregation**: Once all parallel tasks complete, their outputs are combined into a comprehensive travel plan by a final LLM call.
+
+4. **Structured Data Models**: Pydantic models define the structure of travel components, ensuring consistency across parallel tasks.
 
 ## 6. Orchestrator-Workers Pattern
 

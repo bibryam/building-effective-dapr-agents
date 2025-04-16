@@ -54,7 +54,7 @@ Run the example:
 
 ```bash
 # Run with Dapr
-dapr run --app-id routing --resources-path components/ -- python 05_routing.py
+dapr run --app-id routing --resources-path components/ -- python 04_routing.py
 ```
 
 ## How It Works

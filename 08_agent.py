@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 """
-Autonomous Agent Pattern - Simple Travel Assistant
-
-This example demonstrates the Autonomous Agent pattern from Anthropic's "Building Effective Agents"
-using Dapr Agents framework with a simplified ReActAgent implementation.
+Autonomous Agent Pattern demonstrates:
+1. How to use ReAct agent that is able to perform reason and action cycles.
 """
 
 import asyncio
+import logging
 from dapr_agents import tool, ReActAgent
 from dotenv import load_dotenv
-
-load_dotenv()
 
 @tool
 def search_weather(city: str) -> str:
@@ -32,7 +29,7 @@ def find_activities(city: str) -> str:
     }
     return activities.get(city.lower(), "Activity data not available")
 
-async def run_agent():
+async def main():
     # Create the ReAct agent with both tools
     travel_agent = ReActAgent(
         name="TravelHelper",
@@ -42,15 +39,13 @@ async def run_agent():
     )
 
     print("=== AUTONOMOUS AGENT EXAMPLE ===")
-    print("Ask about travel information for cities like London, Paris, or Tokyo.")
-    print("The agent will decide which information to get first.\n")
+    print("The agent will decide what information to get first.\n")
 
     # Example query that requires both tools
     result = await travel_agent.run("I'm planning a trip to Paris. What should I know?")
     print(f"Result: {result}")
 
-def main():
-    asyncio.run(run_agent())
-
 if __name__ == "__main__":
-    main()
+    load_dotenv()
+    logging.basicConfig(level=logging.INFO)
+    asyncio.run(main())

@@ -53,7 +53,7 @@ Run the example:
 
 ```bash
 # Run with Dapr
-dapr run --app-id parallelization --resources-path components/ -- python 04_parallelization.py
+dapr run --app-id parallelization --resources-path components/ -- python 05_parallelization.py
 ```
 
 ## How It Works
